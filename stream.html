@@ -1,41 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stream</title>
 
+    <!-- Include Shaka Player -->
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@3.2.1/dist/shaka-player.compiled.js"></script>
     <!-- Include THEOplayer -->
     <script src="https://cdn.theoplayer.com/2.19.0/theoplayer.min.js"></script>
 
-    <style>
-        /* Styling the video player container */
-        #video-container {
-            width: 100%;
-            height: 100%;
-        }
+<style>
+/* Styling the video player container */
+#video-container {
+width: 100%;
+height: 100%;
+}
+        video {
         #theoplayer {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
-</head>
+width: 100%;
+height: 100%;
+}
+@@ -23,35 +23,33 @@
 <body>
 
-    <div id="video-container">
+<div id="video-container">
+        <video id="video" controls autoplay></video>
         <div id="theoplayer"></div>
-    </div>
+</div>
 
-    <script>
+<script>
+        // Initialize Shaka Player after the page has loaded
         // Initialize THEOplayer after the page has loaded
-        window.onload = function() {
+window.onload = function() {
+            const video = document.getElementById('video');
+            const player = new shaka.Player(video);
+
+            // Error handling for Shaka Player
+            player.addEventListener('error', onErrorEvent);
             const player = new Theoplayer.Player('theoplayer');
 
-            // Get the stream URL from the query parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const streamUrl = urlParams.get('stream'); // e.g. "stream1.mpd"
+// Get the stream URL from the query parameters
+const urlParams = new URLSearchParams(window.location.search);
+const streamUrl = urlParams.get('stream'); // e.g. "stream1.mpd"
 
-            if (streamUrl) {
+if (streamUrl) {
+                player.load(streamUrl).then(function() {
+                    console.log('Stream loaded successfully');
+                }).catch(onError);
                 // Load the stream URL into the player
                 player.source = {
                     sources: [
@@ -46,11 +58,15 @@
                     ]
                 };
                 console.log('Stream loaded successfully');
-            } else {
-                console.error('No stream URL provided');
-            }
-        };
-    </script>
+} else {
+console.error('No stream URL provided');
+}
+};
 
-</body>
-</html>
+        // Error handling function for Shaka Player
+        function onErrorEvent(event) {
+            console.error('Error code', event.detail.code, 'object', event.detail);
+        }
+</script>
+
+    </body>
