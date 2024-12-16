@@ -1,0 +1,99 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #000; /* Black Background */
+    font-family: Arial, sans-serif;
+    color: #fff;
+}
+
+/* Header Box */
+.header-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 20px auto;
+    max-width: 500px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.header-logo img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: color-change 1s infinite alternate;
+}
+
+/* Text Color Animation */
+@keyframes color-change {
+    0% { color: red; }
+    50% { color: yellow; }
+    100% { color: blue; }
+}
+
+/* Channel Cards Section */
+.channel-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.channel-card {
+    display: flex;
+    align-items: center;
+    width: 90%;
+    max-width: 500px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.channel-card:hover {
+    transform: scale(1.03);
+}
+
+.channel-circle img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.channel-button {
+    flex: 1;
+    text-align: center;
+    background-color: #444;
+    color: #fff;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.channel-button:hover {
+    background-color: #666;
+}
