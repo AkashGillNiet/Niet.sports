@@ -37,7 +37,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Makes sure snow doesn't interfere with video controls */
+            pointer-events: none;
             z-index: 1;
         }
 
@@ -50,7 +50,7 @@
             padding-bottom: 56.25%; /* Aspect ratio for 16:9 */
             margin: 20px auto;
             background-color: #000;
-            z-index: 2; /* Ensures video is above the snowfall */
+            z-index: 2;
         }
 
         /* Style the video player to be responsive */
@@ -73,6 +73,20 @@
             font-size: 3rem;
         }
 
+        /* Quality selection dropdown */
+        .quality-select {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 3;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid #fff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
     </style>
 </head>
 
@@ -83,6 +97,14 @@
     <!-- Stream container with video player -->
     <div class="stream-container">
         <h1>Live Stream</h1>
+
+        <!-- Quality selection dropdown -->
+        <select class="quality-select" id="qualitySelect">
+            <option value="1080p">1080p</option>
+            <option value="720p">720p</option>
+            <option value="480p">480p</option>
+            <option value="360p">360p</option>
+        </select>
 
         <!-- Video.js player -->
         <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay>
@@ -96,49 +118,118 @@
 
     <script>
         // Snowfall effect JavaScript
-        (function() {
-            const snowfall = document.querySelector('.snowfall');
+        const snowColors = [
+            '#FFFFFF', '#D1E0E0', '#B0C4DE', '#A9A9A9', '#C0C0C0', '#F0F8FF',
+            '#FAEBD7', '#E0FFFF', '#D3D3D3', '#FFFAF0', '#F5FFFA', '#DCDCDC', '#90EE90',
+            '#98FB98', '#32CD32', '#ADFF2F', '#228B22', '#006400', '#FFD700', '#FF6347'
+        ];
 
-            function createSnowflake() {
-                const snowflake = document.createElement('div');
-                snowflake.classList.add('snowflake');
-                snowflake.style.position = 'absolute';
-                snowflake.style.top = '-10px';
-                snowflake.style.left = Math.random() * window.innerWidth + 'px';
-                snowflake.style.opacity = Math.random();
-                snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
-                snowflake.innerHTML = '❄';
-                snowfall.appendChild(snowflake);
+        const leafColors = [
+            '#8B4513', '#A52A2A', '#DEB887', '#D2691E', '#CD5C5C', '#FF7F50',
+            '#FF6347', '#FFD700', '#B8860B', '#F0E68C', '#F4A460', '#2E8B57',
+            '#228B22', '#006400', '#800000', '#9B30FF', '#8B0000', '#FF4500', '#BDB76B', '#A9A9A9'
+        ];
 
-                let speed = Math.random() * 3 + 2;
-                let direction = Math.random() > 0.5 ? 1 : -1;
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            const randomSnowColor = snowColors[Math.floor(Math.random() * snowColors.length)];
+            snowflake.classList.add('snowflake');
+            snowflake.style.position = 'absolute';
+            snowflake.style.top = '-10px';
+            snowflake.style.left = Math.random() * window.innerWidth + 'px';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+            snowflake.innerHTML = '❄';
+            snowflake.style.color = randomSnowColor;
+            snowfall.appendChild(snowflake);
 
-                function fall() {
-                    let rect = snowflake.getBoundingClientRect();
-                    if (rect.top > window.innerHeight) {
-                        snowflake.remove();
-                    } else {
-                        snowflake.style.top = rect.top + speed + 'px';
-                        snowflake.style.left = rect.left + direction * Math.random() * 0.5 + 'px';
-                    }
+            let speed = Math.random() * 3 + 2;
+            let direction = Math.random() > 0.5 ? 1 : -1;
 
-                    requestAnimationFrame(fall);
+            function fall() {
+                let rect = snowflake.getBoundingClientRect();
+                if (rect.top > window.innerHeight) {
+                    snowflake.remove();
+                } else {
+                    snowflake.style.top = rect.top + speed + 'px';
+                    snowflake.style.left = rect.left + direction * Math.random() * 0.5 + 'px';
                 }
 
-                fall();
+                requestAnimationFrame(fall);
             }
 
-            // Create snowflakes continuously
-            setInterval(createSnowflake, 100);
-        })();
+            fall();
+        }
+
+        function createLeaf() {
+            const leaf = document.createElement('div');
+            const randomLeafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+            leaf.classList.add('leaf');
+            leaf.style.position = 'absolute';
+            leaf.style.top = '-10px';
+            leaf.style.left = Math.random() * window.innerWidth + 'px';
+            leaf.style.opacity = Math.random();
+            leaf.style.fontSize = Math.random() * 15 + 15 + 'px';
+            leaf.innerHTML = '🍂';
+            leaf.style.color = randomLeafColor;
+            snowfall.appendChild(leaf);
+
+            let speed = Math.random() * 2 + 2;
+            let direction = Math.random() > 0.5 ? 1 : -1;
+
+            function fall() {
+                let rect = leaf.getBoundingClientRect();
+                if (rect.top > window.innerHeight) {
+                    leaf.remove();
+                } else {
+                    leaf.style.top = rect.top + speed + 'px';
+                    leaf.style.left = rect.left + direction * Math.random() * 0.5 + 'px';
+                }
+
+                requestAnimationFrame(fall);
+            }
+
+            fall();
+        }
+
+        // Create snowflakes and leaves continuously
+        setInterval(() => {
+            createSnowflake();
+            createLeaf();
+        }, 100);
 
         // Get the stream URL from the query string in the URL
         const urlParams = new URLSearchParams(window.location.search);
-        const streamUrl = urlParams.get('streamUrl');
+        let streamUrl = urlParams.get('streamUrl');
+
+        // Initialize Video.js player with default stream URL
+        const player = videojs('videoPlayer');
+
+        function changeQuality(quality) {
+            const qualityMap = {
+                '1080p': '?quality=1080p',
+                '720p': '?quality=720p',
+                '480p': '?quality=480p',
+                '360p': '?quality=360p'
+            };
+
+            const selectedStreamUrl = streamUrl + qualityMap[quality];
+
+            if (selectedStreamUrl) {
+                player.src({
+                    type: 'application/x-mpegURL',
+                    src: selectedStreamUrl
+                });
+                player.play();
+            }
+        }
+
+        // Listen to quality selection change
+        document.getElementById('qualitySelect').addEventListener('change', (event) => {
+            changeQuality(event.target.value);
+        });
 
         if (streamUrl) {
-            // Initialize Video.js player with the stream URL
-            const player = videojs('videoPlayer');
             player.src({
                 type: 'application/x-mpegURL',
                 src: streamUrl
