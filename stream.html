@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Niet Sports</title>
 
-    <!-- Flowplayer CSS -->
-    <link rel="stylesheet" href="https://releases.flowplayer.org/7.2.7/skin/skin.css">
-
+    <!-- Clappr CSS -->
     <style>
         /* Reset and basic setup */
         * {
@@ -66,28 +64,18 @@
             }
         }
 
-        /* Stream container */
-        .stream-container {
+        /* Player container */
+        #player {
             position: relative;
-            width: 100%;
-            max-width: 80%;
-            height: 0;
-            padding-bottom: 56.25%; /* Aspect ratio for 16:9 */
+            width: 80%;
+            max-width: 1000px;
+            height: 56.25vw; /* 16:9 aspect ratio */
+            max-height: 562px;
             margin: auto;
-            background-color: #000;
             z-index: 2;
         }
 
-        /* Flowplayer */
-        .flowplayer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Quality selection dropdown */
+        /* Quality selector dropdown */
         .quality-selector {
             position: absolute;
             top: 10px;
@@ -110,41 +98,22 @@
     <!-- Falling effects container -->
     <div class="effects-container"></div>
 
-    <!-- Stream container -->
-    <div class="stream-container">
-        <!-- Flowplayer -->
-        <div class="flowplayer" id="videoPlayer"></div>
-    </div>
+    <!-- Video Player -->
+    <div id="player"></div>
 
-    <!-- Quality selector -->
-    <div class="quality-selector">
-        <select id="qualitySelector">
-            <option value="0">Auto</option>
-            <option value="1">144p</option>
-            <option value="2">360p</option>
-            <option value="3">720p</option>
-            <option value="4">1080p</option>
-        </select>
-    </div>
-
-    <!-- Flowplayer JS -->
-    <script src="https://releases.flowplayer.org/7.2.7/flowplayer.min.js"></script>
+    <!-- Clappr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
 
     <script>
-        const effectsColors = [
-            '#FFFFFF', '#FFD700', '#32CD32', '#228B22', '#FF6347',
-            '#ADFF2F', '#006400', '#90EE90', '#FFFAF0', '#F5FFFA'
-        ];
+        // Falling effects (snowflakes and leaves)
+        const effectsColors = ['#FFFFFF', '#FFD700', '#32CD32', '#228B22', '#FF6347', '#ADFF2F', '#006400', '#90EE90', '#FFFAF0', '#F5FFFA'];
 
-        // Generate falling effects (snowflakes and leaves)
         function generateEffects() {
             const effectsContainer = document.querySelector('.effects-container');
-
-            // Create multiple falling elements
             for (let i = 0; i < 50; i++) {
                 const effect = document.createElement('div');
                 effect.classList.add('effect');
-                effect.textContent = Math.random() > 0.5 ? '❄' : '🍂'; // Randomly choose snowflake or leaf
+                effect.textContent = Math.random() > 0.5 ? '❄' : '🍂'; // Random choice of snowflake or leaf
                 effect.style.color = effectsColors[Math.floor(Math.random() * effectsColors.length)];
                 effect.style.left = Math.random() * 100 + 'vw';
                 effect.style.fontSize = Math.random() * 20 + 10 + 'px';
@@ -152,40 +121,44 @@
                 effectsContainer.appendChild(effect);
             }
         }
-
         generateEffects();
 
-        // Flowplayer setup
+        // Get stream URL from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const streamUrl = urlParams.get('streamUrl');
+        const streamUrl = urlParams.get('streamUrl') || 'https://path/to/default/video.mp4'; // Replace with a default video
 
-        if (streamUrl) {
-            flowplayer("#videoPlayer", {
-                clip: {
-                    sources: [
-                        { type: "application/x-mpegURL", src: streamUrl }
-                    ]
-                },
-                adaptiveRatio: true
-            });
-        } else {
-            alert('No stream URL provided');
-        }
+        // Initialize Clappr Player
+        const player = new Clappr.Player({
+            source: streamUrl,
+            parentId: '#player',
+            autoPlay: true,
+            height: '100%',
+            width: '100%',
+            mute: false,
+            plugins: [Clappr.FlasHLSPlugin],
+            mediacontrol: { seekbar: "#FF6347", buttons: "#FFD700" },
+        });
 
-        // Quality selector
-        const qualitySelector = document.getElementById('qualitySelector');
-        qualitySelector.addEventListener('change', function () {
+        // Optional: Add Quality Selector
+        const qualitySelector = document.createElement('div');
+        qualitySelector.classList.add('quality-selector');
+        qualitySelector.innerHTML = `
+            <select id="qualitySelector">
+                <option value="auto">Auto</option>
+                <option value="144p">144p</option>
+                <option value="360p">360p</option>
+                <option value="720p">720p</option>
+                <option value="1080p">1080p</option>
+            </select>
+        `;
+        document.body.appendChild(qualitySelector);
+
+        document.getElementById('qualitySelector').addEventListener('change', function () {
             const selectedQuality = this.value;
 
-            // Add the quality parameter dynamically to the single stream URL
+            // Replace stream URL with selected quality (assumes backend handles this)
             const newStreamUrl = streamUrl + `?quality=${selectedQuality}`;
-            flowplayer("#videoPlayer", {
-                clip: {
-                    sources: [
-                        { type: "application/x-mpegURL", src: newStreamUrl }
-                    ]
-                }
-            });
+            player.load(newStreamUrl);
         });
     </script>
 </body>
