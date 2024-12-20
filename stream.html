@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream</title>
+    <title>Niet Sports</title>
 
-    <!-- Plyr CSS -->
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+    <!-- Flowplayer CSS -->
+    <link rel="stylesheet" href="https://releases.flowplayer.org/7.2.7/skin/skin.css">
 
     <style>
         /* Reset and basic setup */
@@ -78,8 +78,8 @@
             z-index: 2;
         }
 
-        /* Plyr video player */
-        .plyr {
+        /* Flowplayer */
+        .flowplayer {
             position: absolute;
             top: 0;
             left: 0;
@@ -112,8 +112,8 @@
 
     <!-- Stream container -->
     <div class="stream-container">
-        <!-- Plyr.js player -->
-        <video id="videoPlayer" class="plyr" controls autoplay></video>
+        <!-- Flowplayer -->
+        <div class="flowplayer" id="videoPlayer"></div>
     </div>
 
     <!-- Quality selector -->
@@ -127,8 +127,8 @@
         </select>
     </div>
 
-    <!-- Plyr.js JS -->
-    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <!-- Flowplayer JS -->
+    <script src="https://releases.flowplayer.org/7.2.7/flowplayer.min.js"></script>
 
     <script>
         const effectsColors = [
@@ -155,15 +155,19 @@
 
         generateEffects();
 
-        // Plyr.js player setup
+        // Flowplayer setup
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('streamUrl');
-        const player = new Plyr('#videoPlayer', { controls: ['play', 'progress', 'volume', 'fullscreen'] });
 
         if (streamUrl) {
-            const videoSource = document.getElementById('videoPlayer');
-            videoSource.src = streamUrl;
-            player.play();
+            flowplayer("#videoPlayer", {
+                clip: {
+                    sources: [
+                        { type: "application/x-mpegURL", src: streamUrl }
+                    ]
+                },
+                adaptiveRatio: true
+            });
         } else {
             alert('No stream URL provided');
         }
@@ -175,9 +179,13 @@
 
             // Add the quality parameter dynamically to the single stream URL
             const newStreamUrl = streamUrl + `?quality=${selectedQuality}`;
-            player.source = { type: 'video', sources: [{ src: newStreamUrl, type: 'application/x-mpegURL' }] };
-
-            player.play();
+            flowplayer("#videoPlayer", {
+                clip: {
+                    sources: [
+                        { type: "application/x-mpegURL", src: newStreamUrl }
+                    ]
+                }
+            });
         });
     </script>
 </body>
