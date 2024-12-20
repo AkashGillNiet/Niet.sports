@@ -1,21 +1,7 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Select all channel cards
-    const channelCards = document.querySelectorAll('.channel-card');
+function openStream(buttonElement) {
+    // Get the stream URL from the data-stream-url attribute of the clicked button
+    var streamUrl = buttonElement.parentElement.getAttribute('data-stream-url');
 
-    // Iterate through each channel card and add a click event listener
-    channelCards.forEach(function(card) {
-        card.addEventListener('click', function() {
-            // Get the data-stream attribute value which contains the URL of the stream page
-            const streamPage = card.getAttribute('data-stream');
-            
-            // Get the actual stream URL from the data-stream-url attribute
-            const streamUrl = card.getAttribute('data-stream-url');
-            
-            // Append the stream URL as a query parameter to stream.html
-            const fullUrl = `${streamPage}?stream=${encodeURIComponent(streamUrl)}`;
-
-            // Open the stream page in a new tab
-            window.open(fullUrl, '_blank');
-        });
-    });
-});
+    // Open the stream in a new page (or you can embed it in an iframe if you prefer)
+    window.open('stream.html?streamUrl=' + encodeURIComponent(streamUrl), '_blank');
+}
