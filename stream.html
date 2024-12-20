@@ -8,14 +8,84 @@
     
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Full-page black background with a subtle gradient */
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #000000, #434343);
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Snowfall container */
+        .snowfall {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Makes sure snow doesn't interfere with video controls */
+            z-index: 1;
+        }
+
+        /* Video player container */
+        .stream-container {
+            position: relative;
+            width: 100%;
+            max-width: 80%;
+            height: 0;
+            padding-bottom: 56.25%; /* Aspect ratio for 16:9 */
+            margin: 20px auto;
+            background-color: #000;
+            z-index: 2; /* Ensures video is above the snowfall */
+        }
+
+        /* Style the video player to be responsive */
+        .video-js {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Centering the heading */
+        h1 {
+            text-align: center;
+            color: #fff;
+            position: absolute;
+            top: 10%;
+            width: 100%;
+            z-index: 3;
+            font-size: 3rem;
+        }
+
+    </style>
 </head>
 
 <body>
+    <!-- Snowfall effect container -->
+    <div class="snowfall"></div>
+
+    <!-- Stream container with video player -->
     <div class="stream-container">
         <h1>Live Stream</h1>
-        
+
         <!-- Video.js player -->
-        <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay width="100%" height="auto">
+        <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay>
             <source id="videoSource" type="application/x-mpegURL">
             Your browser does not support the video tag.
         </video>
@@ -23,8 +93,45 @@
 
     <!-- Video.js JS -->
     <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
-    
+
     <script>
+        // Snowfall effect JavaScript
+        (function() {
+            const snowfall = document.querySelector('.snowfall');
+
+            function createSnowflake() {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.style.position = 'absolute';
+                snowflake.style.top = '-10px';
+                snowflake.style.left = Math.random() * window.innerWidth + 'px';
+                snowflake.style.opacity = Math.random();
+                snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+                snowflake.innerHTML = '❄';
+                snowfall.appendChild(snowflake);
+
+                let speed = Math.random() * 3 + 2;
+                let direction = Math.random() > 0.5 ? 1 : -1;
+
+                function fall() {
+                    let rect = snowflake.getBoundingClientRect();
+                    if (rect.top > window.innerHeight) {
+                        snowflake.remove();
+                    } else {
+                        snowflake.style.top = rect.top + speed + 'px';
+                        snowflake.style.left = rect.left + direction * Math.random() * 0.5 + 'px';
+                    }
+
+                    requestAnimationFrame(fall);
+                }
+
+                fall();
+            }
+
+            // Create snowflakes continuously
+            setInterval(createSnowflake, 100);
+        })();
+
         // Get the stream URL from the query string in the URL
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('streamUrl');
