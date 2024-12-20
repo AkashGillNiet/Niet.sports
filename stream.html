@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Stream</title>
 
-    <!-- Shaka Player CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.0.4/controls.min.css">
+    <!-- Flowplayer CSS -->
+    <link rel="stylesheet" href="https://releases.flowplayer.org/7.2.7/skin/skin.css">
 
     <style>
         /* Reset and basic setup */
@@ -78,8 +78,8 @@
             z-index: 2;
         }
 
-        /* Shaka Player */
-        #videoPlayer {
+        /* Flowplayer */
+        .flowplayer {
             position: absolute;
             top: 0;
             left: 0;
@@ -112,8 +112,8 @@
 
     <!-- Stream container -->
     <div class="stream-container">
-        <!-- Shaka Player -->
-        <video id="videoPlayer" controls autoplay></video>
+        <!-- Flowplayer -->
+        <div class="flowplayer" id="videoPlayer"></div>
     </div>
 
     <!-- Quality selector -->
@@ -127,8 +127,8 @@
         </select>
     </div>
 
-    <!-- Shaka Player JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.0.4/shaka-player.compiled.js"></script>
+    <!-- Flowplayer JS -->
+    <script src="https://releases.flowplayer.org/7.2.7/flowplayer.min.js"></script>
 
     <script>
         const effectsColors = [
@@ -155,42 +155,37 @@
 
         generateEffects();
 
-        // Shaka Player setup
+        // Flowplayer setup
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('streamUrl');
-        const video = document.getElementById('videoPlayer');
 
         if (streamUrl) {
-            const player = new shaka.Player(video);
-
-            player.load(streamUrl).then(() => {
-                console.log('The video has been loaded!');
-            }).catch(error => {
-                console.error('Error loading video:', error);
+            flowplayer("#videoPlayer", {
+                clip: {
+                    sources: [
+                        { type: "application/x-mpegURL", src: streamUrl }
+                    ]
+                },
+                adaptiveRatio: true
             });
-
         } else {
             alert('No stream URL provided');
         }
 
         // Quality selector
         const qualitySelector = document.getElementById('qualitySelector');
-        qualitySelector.addEventListener('change', async function () {
+        qualitySelector.addEventListener('change', function () {
             const selectedQuality = this.value;
-            const player = shaka.Player.getInstance(video);
 
-            // Adjust the video quality dynamically
-            if (player && selectedQuality > 0) {
-                const tracks = player.getVariantTracks();
-                const qualityLevels = [144, 360, 720, 1080];
-
-                const chosenTrack = tracks.find(track => track.height === qualityLevels[selectedQuality - 1]);
-                if (chosenTrack) {
-                    player.selectVariantTrack(chosenTrack, true);
+            // Add the quality parameter dynamically to the single stream URL
+            const newStreamUrl = streamUrl + `?quality=${selectedQuality}`;
+            flowplayer("#videoPlayer", {
+                clip: {
+                    sources: [
+                        { type: "application/x-mpegURL", src: newStreamUrl }
+                    ]
                 }
-            } else {
-                player.configure({ abr: { enabled: true } }); // Auto quality
-            }
+            });
         });
     </script>
 </body>
