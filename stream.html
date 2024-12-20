@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Stream</title>
 
-    <!-- Shaka Player CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.0.4/controls.min.css">
+    <!-- Plyr CSS -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
 
     <style>
         /* Reset and basic setup */
@@ -78,8 +78,8 @@
             z-index: 2;
         }
 
-        /* Shaka Player */
-        #videoPlayer {
+        /* Plyr video player */
+        .plyr {
             position: absolute;
             top: 0;
             left: 0;
@@ -112,8 +112,8 @@
 
     <!-- Stream container -->
     <div class="stream-container">
-        <!-- Shaka Player -->
-        <video id="videoPlayer" controls autoplay></video>
+        <!-- Plyr.js player -->
+        <video id="videoPlayer" class="plyr" controls autoplay></video>
     </div>
 
     <!-- Quality selector -->
@@ -127,8 +127,8 @@
         </select>
     </div>
 
-    <!-- Shaka Player JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.0.4/shaka-player.compiled.js"></script>
+    <!-- Plyr.js JS -->
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 
     <script>
         const effectsColors = [
@@ -155,42 +155,29 @@
 
         generateEffects();
 
-        // Shaka Player setup
+        // Plyr.js player setup
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('streamUrl');
-        const video = document.getElementById('videoPlayer');
+        const player = new Plyr('#videoPlayer', { controls: ['play', 'progress', 'volume', 'fullscreen'] });
 
         if (streamUrl) {
-            const player = new shaka.Player(video);
-
-            player.load(streamUrl).then(() => {
-                console.log('The video has been loaded!');
-            }).catch(error => {
-                console.error('Error loading video:', error);
-            });
-
+            const videoSource = document.getElementById('videoPlayer');
+            videoSource.src = streamUrl;
+            player.play();
         } else {
             alert('No stream URL provided');
         }
 
         // Quality selector
         const qualitySelector = document.getElementById('qualitySelector');
-        qualitySelector.addEventListener('change', async function () {
+        qualitySelector.addEventListener('change', function () {
             const selectedQuality = this.value;
-            const player = shaka.Player.getInstance(video);
 
-            // Adjust the video quality dynamically
-            if (player && selectedQuality > 0) {
-                const tracks = player.getVariantTracks();
-                const qualityLevels = [144, 360, 720, 1080];
+            // Add the quality parameter dynamically to the single stream URL
+            const newStreamUrl = streamUrl + `?quality=${selectedQuality}`;
+            player.source = { type: 'video', sources: [{ src: newStreamUrl, type: 'application/x-mpegURL' }] };
 
-                const chosenTrack = tracks.find(track => track.height === qualityLevels[selectedQuality - 1]);
-                if (chosenTrack) {
-                    player.selectVariantTrack(chosenTrack, true);
-                }
-            } else {
-                player.configure({ abr: { enabled: true } }); // Auto quality
-            }
+            player.play();
         });
     </script>
 </body>
