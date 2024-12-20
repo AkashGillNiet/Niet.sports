@@ -5,32 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Stream</title>
-    
+
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
 
     <style>
-        /* Basic Reset */
+        /* Reset and basic setup */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Full-page black background with gradient */
         body {
             height: 100vh;
-            background: linear-gradient(135deg, #000000, #434343);
+            background: linear-gradient(135deg, #000000, #1a1a1a);
             overflow: hidden;
-            font-family: Arial, sans-serif;
-            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            font-family: Arial, sans-serif;
+            color: white;
         }
 
-        /* Snowfall and leaves container */
+        /* Falling effects container */
         .effects-container {
             position: absolute;
             top: 0;
@@ -41,7 +39,34 @@
             z-index: 1;
         }
 
-        /* Video player container */
+        .effect {
+            position: absolute;
+            animation: fall 10s linear infinite, sway 3s ease-in-out infinite;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        @keyframes fall {
+            0% {
+                top: -10%;
+                opacity: 0.5;
+            }
+            100% {
+                top: 110%;
+                opacity: 1;
+            }
+        }
+
+        @keyframes sway {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(20px);
+            }
+        }
+
+        /* Stream container */
         .stream-container {
             position: relative;
             width: 100%;
@@ -53,7 +78,7 @@
             z-index: 2;
         }
 
-        /* Style the video player */
+        /* Video player */
         .video-js {
             position: absolute;
             top: 0;
@@ -82,10 +107,10 @@
 </head>
 
 <body>
-    <!-- Snowfall and leaves effect container -->
+    <!-- Falling effects container -->
     <div class="effects-container"></div>
 
-    <!-- Stream container with video player -->
+    <!-- Stream container -->
     <div class="stream-container">
         <!-- Video.js player -->
         <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay>
@@ -109,55 +134,33 @@
     <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
 
     <script>
-        // Snowfall and leaves colors
         const effectsColors = [
-            '#FFFFFF', '#D1E0E0', '#B0C4DE', '#FFD700', '#32CD32', '#228B22', '#FF6347',
+            '#FFFFFF', '#FFD700', '#32CD32', '#228B22', '#FF6347',
             '#ADFF2F', '#006400', '#90EE90', '#FFFAF0', '#F5FFFA'
         ];
 
-        // Falling effect generator
-        function createEffect(type) {
-            const effect = document.createElement('div');
-            const randomColor = effectsColors[Math.floor(Math.random() * effectsColors.length)];
-            effect.classList.add(type);
-            effect.style.position = 'absolute';
-            effect.style.top = '-10px';
-            effect.style.left = Math.random() * window.innerWidth + 'px';
-            effect.style.opacity = Math.random();
-            effect.style.fontSize = Math.random() * 10 + 10 + 'px';
-            effect.innerHTML = type === 'snowflake' ? '❄' : '🍂'; // Snowflake or leaf
-            effect.style.color = randomColor;
-            document.querySelector('.effects-container').appendChild(effect);
+        // Generate falling effects (snowflakes and leaves)
+        function generateEffects() {
+            const effectsContainer = document.querySelector('.effects-container');
 
-            let speed = Math.random() * 3 + 2;
-            let direction = Math.random() > 0.5 ? 1 : -1;
-
-            function fall() {
-                let rect = effect.getBoundingClientRect();
-                if (rect.top > window.innerHeight) {
-                    effect.remove();
-                } else {
-                    effect.style.top = rect.top + speed + 'px';
-                    effect.style.left = rect.left + direction * Math.random() * 0.5 + 'px';
-                }
-
-                requestAnimationFrame(fall);
+            // Create multiple falling elements
+            for (let i = 0; i < 50; i++) {
+                const effect = document.createElement('div');
+                effect.classList.add('effect');
+                effect.textContent = Math.random() > 0.5 ? '❄' : '🍂'; // Randomly choose snowflake or leaf
+                effect.style.color = effectsColors[Math.floor(Math.random() * effectsColors.length)];
+                effect.style.left = Math.random() * 100 + 'vw';
+                effect.style.fontSize = Math.random() * 20 + 10 + 'px';
+                effect.style.animationDelay = Math.random() * 5 + 's';
+                effectsContainer.appendChild(effect);
             }
-
-            fall();
         }
 
-        // Generate snowflakes and leaves continuously
-        setInterval(() => {
-            createEffect('snowflake');
-            createEffect('leaf');
-        }, 200);
+        generateEffects();
 
-        // Get the stream URL from the query string in the URL
+        // Video.js player setup
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('streamUrl');
-
-        // Initialize Video.js player
         const player = videojs('videoPlayer');
 
         if (streamUrl) {
@@ -165,14 +168,12 @@
                 type: 'application/x-mpegURL',
                 src: streamUrl
             });
-
-            // Start playing the video
             player.play();
         } else {
             alert('No stream URL provided');
         }
 
-        // Quality selector functionality
+        // Quality selector
         const qualitySelector = document.getElementById('qualitySelector');
         qualitySelector.addEventListener('change', function () {
             const selectedQuality = this.value;
