@@ -4,30 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream</title>
+    <title>Live Stream</title>
+    
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="stream-container">
         <h1>Live Stream</h1>
-        <!-- Video player for streaming -->
-        <video id="videoPlayer" controls autoplay width="100%" height="auto">
+        
+        <!-- Video.js player -->
+        <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay width="100%" height="auto">
             <source id="videoSource" type="application/x-mpegURL">
             Your browser does not support the video tag.
         </video>
     </div>
 
+    <!-- Video.js JS -->
+    <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
+    
     <script>
         // Get the stream URL from the query string in the URL
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('streamUrl');
 
         if (streamUrl) {
-            // Set the stream URL as the video source
-            document.getElementById('videoSource').src = streamUrl;
+            // Initialize Video.js player with the stream URL
+            const player = videojs('videoPlayer');
+            player.src({
+                type: 'application/x-mpegURL',
+                src: streamUrl
+            });
 
-            // Refresh the video player to load the new source
-            document.getElementById('videoPlayer').load();
+            // Start playing the video
+            player.play();
         } else {
             alert('No stream URL provided');
         }
