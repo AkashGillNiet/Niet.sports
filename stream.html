@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niet Sports</title>
+    <title>Universal Video Player</title>
 
-    <!-- Clappr CSS -->
+    <!-- JWPlayer Setup -->
+    <script src="https://cdn.jwplayer.com/libraries/your-library-key.js"></script>
+
     <style>
         /* Reset and basic setup */
         * {
@@ -18,7 +20,6 @@
         body {
             height: 100vh;
             background: linear-gradient(135deg, #000000, #1a1a1a);
-            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -64,32 +65,14 @@
             }
         }
 
-        /* Player container */
+        /* Video player container */
         #player {
-            position: relative;
             width: 80%;
             max-width: 1000px;
-            height: 56.25vw; /* 16:9 aspect ratio */
+            height: 56.25vw; /* 16:9 Aspect ratio */
             max-height: 562px;
             margin: auto;
             z-index: 2;
-        }
-
-        /* Quality selector dropdown */
-        .quality-selector {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 3;
-        }
-
-        .quality-selector select {
-            padding: 5px 10px;
-            font-size: 14px;
-            border-radius: 4px;
-            border: none;
-            background: #333;
-            color: #fff;
         }
     </style>
 </head>
@@ -98,14 +81,11 @@
     <!-- Falling effects container -->
     <div class="effects-container"></div>
 
-    <!-- Video Player -->
+    <!-- JWPlayer container -->
     <div id="player"></div>
 
-    <!-- Clappr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
-
     <script>
-        // Falling effects (snowflakes and leaves)
+        // Falling effects
         const effectsColors = ['#FFFFFF', '#FFD700', '#32CD32', '#228B22', '#FF6347', '#ADFF2F', '#006400', '#90EE90', '#FFFAF0', '#F5FFFA'];
 
         function generateEffects() {
@@ -113,7 +93,7 @@
             for (let i = 0; i < 50; i++) {
                 const effect = document.createElement('div');
                 effect.classList.add('effect');
-                effect.textContent = Math.random() > 0.5 ? '❄' : '🍂'; // Random choice of snowflake or leaf
+                effect.textContent = Math.random() > 0.5 ? '❄' : '🍂'; // Random snowflake or leaf
                 effect.style.color = effectsColors[Math.floor(Math.random() * effectsColors.length)];
                 effect.style.left = Math.random() * 100 + 'vw';
                 effect.style.fontSize = Math.random() * 20 + 10 + 'px';
@@ -121,27 +101,29 @@
                 effectsContainer.appendChild(effect);
             }
         }
+
         generateEffects();
 
-        // Get stream URL from URL parameters
+        // Get the stream URL from the URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const streamUrl = urlParams.get('streamUrl') || 'https://path/to/default/video.mp4'; // Replace with a default video
+        const streamUrl = urlParams.get('streamUrl') || 'https://cdn.jwplayer.com/manifests/your-default-stream.m3u8';
 
-        // Initialize Clappr Player
-        const player = new Clappr.Player({
-            source: streamUrl,
-            parentId: '#player',
-            autoPlay: true,
-            height: '100%',
-            width: '100%',
-            mute: false,
-            plugins: [Clappr.FlasHLSPlugin],
-            mediacontrol: { seekbar: "#FF6347", buttons: "#FFD700" },
+        // Initialize JWPlayer
+        jwplayer("player").setup({
+            file: streamUrl,
+            autostart: true,
+            width: "100%",
+            aspectratio: "16:9",
+            playbackRateControls: [0.5, 1, 1.5, 2], // Playback speed options
         });
 
-        // Optional: Add Quality Selector
+        // Quality selection
+        jwplayer("player").on("levelsChanged", function () {
+            console.log("Quality changed!");
+        });
+
+        // Dynamic stream quality selector (if available)
         const qualitySelector = document.createElement('div');
-        qualitySelector.classList.add('quality-selector');
         qualitySelector.innerHTML = `
             <select id="qualitySelector">
                 <option value="auto">Auto</option>
@@ -155,10 +137,8 @@
 
         document.getElementById('qualitySelector').addEventListener('change', function () {
             const selectedQuality = this.value;
-
-            // Replace stream URL with selected quality (assumes backend handles this)
-            const newStreamUrl = streamUrl + `?quality=${selectedQuality}`;
-            player.load(newStreamUrl);
+            const newStreamUrl = `${streamUrl}?quality=${selectedQuality}`;
+            jwplayer("player").load([{ file: newStreamUrl }]);
         });
     </script>
 </body>
