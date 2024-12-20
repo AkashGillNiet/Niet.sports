@@ -1,31 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream</title>
 </head>
+
 <body>
-    <h1>Streaming</h1>
-    <div id="stream-container">
-        <video id="stream-player" controls autoplay>
-            <source id="stream-source" type="application/x-mpegURL">
+    <div class="stream-container">
+        <h1>Live Stream</h1>
+        <!-- Video player for streaming -->
+        <video id="videoPlayer" controls autoplay width="100%" height="auto">
+            <source id="videoSource" type="application/x-mpegURL">
             Your browser does not support the video tag.
         </video>
     </div>
 
     <script>
-        // Get the stream URL from the query parameters
-        var urlParams = new URLSearchParams(window.location.search);
-        var streamUrl = urlParams.get('streamUrl');
+        // Get the stream URL from the query string in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('streamUrl');
 
-        // Set the stream URL in the video source element
         if (streamUrl) {
-            document.getElementById('stream-source').src = streamUrl;
-            document.getElementById('stream-player').load(); // Reload the video player
+            // Set the stream URL as the video source
+            document.getElementById('videoSource').src = streamUrl;
+
+            // Refresh the video player to load the new source
+            document.getElementById('videoPlayer').load();
         } else {
-            alert('Stream URL not found');
+            alert('No stream URL provided');
         }
     </script>
 </body>
+
 </html>
