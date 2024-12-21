@@ -131,19 +131,22 @@
         async function initShakaPlayer() {
             const urlParams = new URLSearchParams(window.location.search);
             const streamUrl = urlParams.get('streamUrl'); // Stream URL from query parameters
+            const widevineDrmUrl = urlParams.get('widevineDrm'); // Widevine DRM license URL
+            const playreadyDrmUrl = urlParams.get('playreadyDrm'); // PlayReady DRM license URL
 
             const videoElement = document.getElementById('videoPlayer');
             const player = new shaka.Player(videoElement);
 
-            // Handle DRM content with license server
-            player.configure({
-                drm: {
-                    servers: {
-                        'com.widevine.alpha': 'https://your-widevine-license-server.com/license',
-                        'com.microsoft.playready': 'https://your-playready-license-server.com/license'
-                    }
-                }
-            });
+            // Configure DRM dynamically
+            const drmConfig = {};
+            if (widevineDrmUrl) {
+                drmConfig['com.widevine.alpha'] = widevineDrmUrl;
+            }
+            if (playreadyDrmUrl) {
+                drmConfig['com.microsoft.playready'] = playreadyDrmUrl;
+            }
+
+            player.configure({ drm: { servers: drmConfig } });
 
             if (streamUrl) {
                 try {
