@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Stream</title>
 
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
+
     <style>
         /* Reset and basic setup */
         * {
@@ -76,13 +79,12 @@
         }
 
         /* Video player */
-        video {
+        .video-js {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
         }
 
         /* Quality selection dropdown */
@@ -110,8 +112,8 @@
 
     <!-- Stream container -->
     <div class="stream-container">
-        <!-- Custom HTML5 video player -->
-        <video id="videoPlayer" controls autoplay muted>
+        <!-- Video.js player -->
+        <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay>
             <source id="videoSource" type="application/x-mpegURL">
             Your browser does not support the video tag.
         </video>
@@ -127,6 +129,9 @@
             <option value="4">1080p</option>
         </select>
     </div>
+
+    <!-- Video.js JS -->
+    <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
 
     <script>
         const effectsColors = [
@@ -153,16 +158,17 @@
 
         generateEffects();
 
-        // Video player setup
+        // Video.js player setup
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('streamUrl');
-        const videoSource = document.getElementById("videoSource");
-        const videoPlayer = document.getElementById("videoPlayer");
+        const player = videojs('videoPlayer');
 
         if (streamUrl) {
-            videoSource.src = streamUrl;
-            videoPlayer.load();
-            videoPlayer.play();
+            player.src({
+                type: 'application/x-mpegURL',
+                src: streamUrl
+            });
+            player.play();
         } else {
             alert('No stream URL provided');
         }
@@ -174,9 +180,12 @@
 
             // Add the quality parameter dynamically to the single stream URL
             const newStreamUrl = streamUrl + `?quality=${selectedQuality}`;
-            videoSource.src = newStreamUrl;
-            videoPlayer.load();
-            videoPlayer.play();
+            player.src({
+                type: 'application/x-mpegURL',
+                src: newStreamUrl
+            });
+
+            player.play();
         });
     </script>
 </body>
