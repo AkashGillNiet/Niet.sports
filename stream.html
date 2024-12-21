@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream</title>
+    <title>Universal Video Player</title>
 
-    <!-- Video.js CSS -->
-    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
+    <!-- Shaka Player CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.15.4/video-js.min.css" rel="stylesheet">
 
     <style>
         /* Reset and basic setup */
@@ -79,29 +79,12 @@
         }
 
         /* Video player */
-        .video-js {
+        #videoPlayer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-        }
-
-        /* Quality selection dropdown */
-        .quality-selector {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 3;
-        }
-
-        .quality-selector select {
-            padding: 5px 10px;
-            font-size: 14px;
-            border-radius: 4px;
-            border: none;
-            background: #333;
-            color: #fff;
         }
     </style>
 </head>
@@ -112,26 +95,12 @@
 
     <!-- Stream container -->
     <div class="stream-container">
-        <!-- Video.js player -->
-        <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay>
-            <source id="videoSource" type="application/x-mpegURL">
-            Your browser does not support the video tag.
-        </video>
+        <!-- Shaka Player container -->
+        <video id="videoPlayer" class="video-js vjs-default-skin" controls autoplay></video>
     </div>
 
-    <!-- Quality selector -->
-    <div class="quality-selector">
-        <select id="qualitySelector">
-            <option value="0">Auto</option>
-            <option value="1">144p</option>
-            <option value="2">360p</option>
-            <option value="3">720p</option>
-            <option value="4">1080p</option>
-        </select>
-    </div>
-
-    <!-- Video.js JS -->
-    <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
+    <!-- Shaka Player -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.0/shaka-player.compiled.js"></script>
 
     <script>
         const effectsColors = [
@@ -158,35 +127,37 @@
 
         generateEffects();
 
-        // Video.js player setup
-        const urlParams = new URLSearchParams(window.location.search);
-        const streamUrl = urlParams.get('streamUrl');
-        const player = videojs('videoPlayer');
+        // Shaka Player setup
+        async function initShakaPlayer() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const streamUrl = urlParams.get('streamUrl'); // Stream URL from query parameters
 
-        if (streamUrl) {
-            player.src({
-                type: 'application/x-mpegURL',
-                src: streamUrl
+            const videoElement = document.getElementById('videoPlayer');
+            const player = new shaka.Player(videoElement);
+
+            // Handle DRM content with license server
+            player.configure({
+                drm: {
+                    servers: {
+                        'com.widevine.alpha': 'https://your-widevine-license-server.com/license',
+                        'com.microsoft.playready': 'https://your-playready-license-server.com/license'
+                    }
+                }
             });
-            player.play();
-        } else {
-            alert('No stream URL provided');
+
+            if (streamUrl) {
+                try {
+                    await player.load(streamUrl); // Load the video stream
+                    console.log('The video has successfully loaded!');
+                } catch (error) {
+                    console.error('Error loading video:', error);
+                }
+            } else {
+                alert('No stream URL provided');
+            }
         }
 
-        // Quality selector
-        const qualitySelector = document.getElementById('qualitySelector');
-        qualitySelector.addEventListener('change', function () {
-            const selectedQuality = this.value;
-
-            // Add the quality parameter dynamically to the single stream URL
-            const newStreamUrl = streamUrl + `?quality=${selectedQuality}`;
-            player.src({
-                type: 'application/x-mpegURL',
-                src: newStreamUrl
-            });
-
-            player.play();
-        });
+        document.addEventListener('DOMContentLoaded', initShakaPlayer);
     </script>
 </body>
 
