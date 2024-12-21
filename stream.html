@@ -28,6 +28,44 @@
             color: white;
         }
 
+        /* Falling effects container */
+        .effects-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .effect {
+            position: absolute;
+            animation: fall 10s linear infinite, sway 3s ease-in-out infinite;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        @keyframes fall {
+            0% {
+                top: -10%;
+                opacity: 0.5;
+            }
+            100% {
+                top: 110%;
+                opacity: 1;
+            }
+        }
+
+        @keyframes sway {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(20px);
+            }
+        }
+
         /* Stream container */
         .stream-container {
             position: relative;
@@ -69,6 +107,9 @@
 </head>
 
 <body>
+    <!-- Falling effects container -->
+    <div class="effects-container"></div>
+
     <!-- Stream container -->
     <div class="stream-container">
         <!-- Video.js player -->
@@ -92,25 +133,47 @@
     <!-- Video.js JS -->
     <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
 
-    <!-- Video.js HLS Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@5.14.0/dist/videojs-contrib-hls.min.js"></script>
-
     <script>
+        const effectsColors = [
+            '#FFFFFF', '#FFD700', '#32CD32', '#228B22', '#FF6347',
+            '#ADFF2F', '#006400', '#90EE90', '#FFFAF0', '#F5FFFA'
+        ];
+
+        // Generate falling effects (snowflakes and leaves)
+        function generateEffects() {
+            const effectsContainer = document.querySelector('.effects-container');
+
+            // Create multiple falling elements
+            for (let i = 0; i < 50; i++) {
+                const effect = document.createElement('div');
+                effect.classList.add('effect');
+                effect.textContent = Math.random() > 0.5 ? '❄' : '🍂'; // Randomly choose snowflake or leaf
+                effect.style.color = effectsColors[Math.floor(Math.random() * effectsColors.length)];
+                effect.style.left = Math.random() * 100 + 'vw';
+                effect.style.fontSize = Math.random() * 20 + 10 + 'px';
+                effect.style.animationDelay = Math.random() * 5 + 's';
+                effectsContainer.appendChild(effect);
+            }
+        }
+
+        generateEffects();
+
         // Video.js player setup
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('streamUrl');
         const player = videojs('videoPlayer');
 
-        // Example stream URL (replace this with your actual HLS stream URL)
-        const streamUrl = 'https://path-to-your-hls-stream.m3u8';
+        if (streamUrl) {
+            player.src({
+                type: 'application/x-mpegURL',
+                src: streamUrl
+            });
+            player.play();
+        } else {
+            alert('No stream URL provided');
+        }
 
-        // Set video source
-        player.src({
-            type: 'application/x-mpegURL',
-            src: streamUrl
-        });
-
-        player.play();
-
-        // Quality selector logic (simplified)
+        // Quality selector
         const qualitySelector = document.getElementById('qualitySelector');
         qualitySelector.addEventListener('change', function () {
             const selectedQuality = this.value;
